@@ -19,10 +19,8 @@ namespace E_commerce.Controllers
         public ActionResult GetUser()
         {
             List<UsersModel> listUsers = new List<UsersModel>();
-            CartModel userDL = new CartModel();
-            userDL.
+            UserDL userDL = new UserDL();
             listUsers = userDL.GetAllUsers();
-
             return Json(listUsers, JsonRequestBehavior.AllowGet);
 
         }
