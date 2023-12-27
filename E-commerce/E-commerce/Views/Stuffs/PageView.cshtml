@@ -1,0 +1,116 @@
+﻿@{
+    ViewBag.Title = "PageView";
+    Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+
+
+
+<style>
+    .descriptionclass {
+        color: black !important;
+        font-size: 15px !important;
+    }
+
+    </style>
+<script>
+    
+
+    function insertintocartbydiv(a, b) {
+
+        if (CheckUserLogin()) {
+
+            var Quantityname = "#QuantityDDL_" + b;
+            var jsondata = {
+                "Quantity": $(Quantityname).val(),
+                "PriceId": a,
+                "ProductId": b,
+
+            }
+
+            $.ajax({
+                url: "https://localhost:44343/Cart/InsertintoCartTable",
+                cache: false,
+                data: jsondata,
+                success: function (data) {
+                    modalAlert3("Success", "Successfully Inserted Into Cart", "green");
+                    UpdateCartCount(data);
+                },
+                error: function () {
+                },
+            });
+
+        }
+
+        else {
+            LoginPopup();
+        }
+
+
+    }
+
+
+    function GoToDetailsPage(ProductId) {
+            @*@{ Response.Redirect("~/DetailPageView/ProDetailPageView?ProductId=ProductId");}*@
+
+
+        var url = "https://localhost:44343/DetailPageView/ProDetailPageView?ProductId=" + ProductId;
+        window.location.href = url;
+    }
+
+
+    function GetActiveProductsByCategoryId() {
+        var CategoryId = @Html.Raw(Json.Encode(Model));
+        $.ajax({
+            url: "https://localhost:44343/Stuffs/GetAllActiveProductsByCategory?CategoryId=" + CategoryId,
+            cache: false,
+            success: function (data) {
+
+                for (var i = 0; i < data.length; i++) {
+                    var dropdown = ('<select  id="QuantityDDL_' + data[i].ProductId +'" class="Quantity"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>');
+                    var card =
+                        ('<div class="col-sm-6 col-md-3"><div class="thumbnail"><img src="http://placehold.it/500x300" onclick="GoToDetailsPage(' + data[i].ProductId + ')"><div class="caption" >'+
+                            '<h3>' + data[i].ProductName + '</h3><p class="pull-right descriptionclass" > Price:    ' + data[i].Price + '</p><p class="descriptionclass">' + data[i].Quantity +' - '+  data[i].Measurements + '</p>'+
+                            '<p><a href="javascript:void(0);" class="btn btn-primary waves-effect pull-right" role="button " onclick="insertintocartbydiv(' + data[i].PPListId +","+ data[i].ProductId + ')">Add To Cart</a></p>'+
+                            '<div>' + dropdown +'</div></div></div></div></div>');
+
+
+                    $("#CardsDiv").append(card);
+
+                }
+                $('.Quantity').selectpicker('refresh');
+            },
+            error: function () { },
+
+
+
+        });
+    }
+
+    $(document).ready(function () {
+        GetActiveProductsByCategoryId();
+    });
+
+</script>
+
+
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                     PRODUCTS
+                    
+                </h2>
+            </div>
+            <div class="body">
+                <div id="CardsDiv" class="row">
+                   
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,160 @@
+﻿
+@{
+    ViewBag.Title = "SalesView";
+}
+<script>
+
+    function UpdateStatus() {
+        $.ajax({
+            url: "https://localhost:44343/Sales/UpdateStatusByOrderId?OrderId=" + $("#hiddenId").val(),
+            cache: false,
+            success: function () {
+                alert("success");
+                window.location.reload();
+
+            },
+            error: function () { },
+        });
+    }
+    function ModalPopUp(OrderId) {
+        $("#hiddenId").val(OrderId);
+        $('#UpdateStatusModal').modal('show');
+    }
+
+    function GetOrders() {
+        $.ajax({
+            url: "https://localhost:44343/Sales/GetOrdersByStatus?Status=" + $("#StatusDDL").val(),
+            cache: false,
+            success: function (data) {
+                console.log(data);
+                $("#cartdiv").empty();
+              for (var i = 0; i < data.length; i++) {
+
+
+                var status = "";
+                switch (data[i].Status) {
+                    case 0:
+                        status = '<span class="label label-primary">Order Placed</span>';
+                        break;
+                    case 1:
+                        status = '<span class="label label-warning">In Progress</span>';
+                        break;
+                    case 2:
+                        status = '<span class="label label-success">Success</span>';
+                        break;
+                }
+                  var Isdisabled = "";
+                  if (data[i].Status == 2) {
+                      Isdisabled = "disabled";
+                  }
+                  
+                  var statusupdatebtn = ('<button '+ Isdisabled +' id = "statusupdate_ ' + data[i].OrderId + '" onclick="ModalPopUp(' + data[i].OrderId + ')" type="button" class="btn bg-indigo btn-circle waves-effect waves-circle waves-float ">' +
+                      '<i class="material-icons">trending_up</i></button> ');
+
+                  var url = "https://localhost:44343/SalesList/SalesListView?OrderId=" + data[i].OrderId;
+
+                  var itemsbtn = ('<a type="button" class="btn bg-pink btn-circle waves-effect waves-circle waves-float style="width:30px;height:30px;' +
+                      'padding:2px,7px;  href="' + url +'" target="_blank"><i class="material-icons">list</i></a>');
+                     
+                var OrderDate = new Date(parseInt(data[i].OrderDate.substr(6)));
+                  var cart = ('<tr><th scope="row">' + (i + 1) + '</th><td>' + data[i].OrderId + '</td><td>' + OrderDate + '</td><td>' + data[i].ItemCount +
+                      '</td><td>' + status + ' </td><td>' + data[i].GrandTotal + '</td><td>' + itemsbtn + statusupdatebtn + '</td></tr>');
+                  
+                  $("#cartdiv").append(cart);
+                 
+
+              }
+            },
+            error: function () { },
+
+
+
+
+        });
+
+    }
+</script>
+
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Orders / Sales</h2>
+
+            </div>
+            <div class="body">
+                <div class="row clearfix">
+                    <div class="col-md-3">
+                        <p>
+                            <b>Status</b>
+                        </p>
+                        <select id="StatusDDL" class="form-control show-tick">
+                            <option value="-1">ALL</option>
+                            <option value="0">Order Placed</option>
+                            <option value="1">In Progress</option>
+                            <option value="2">Success</option>
+                        </select>
+
+                    </div>
+                    <br>
+                    <button id="searchbtn" type="button" onclick="GetOrders()" class="btn bg-purple waves-effect">
+                        <i class="material-icons">search</i>
+                        <span>SEARCH</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="table" class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Orders</h2>
+            </div>
+
+                <div class="body table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="bg-cyan">
+                                <th>#</th>
+                                <th>Order No</th>
+                                <th>Order Date</th>
+                                <th>Items</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+
+                            </tr>
+                        </thead>
+                        <tbody id="cartdiv">
+
+                        </tbody>
+                    </table>
+                </div>
+
+           
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="UpdateStatusModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div id="CommonModalContent" class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="alertLabel">Modal title</h4>
+                <input type="text" id="hiddenId" />
+            </div>
+            <div class="modal-body" id="alertBody">
+                Are you Sure, You want to Update the Status??
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link waves-effect" Onclick="UpdateStatus()">YES</button>
+                <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
+            </div>
+        </div>
+    </div>
+</div>

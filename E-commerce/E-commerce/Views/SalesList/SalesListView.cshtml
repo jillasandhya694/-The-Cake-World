@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewBag.Title = "ProductView";
+}
+<script>
+    function GetItemDeteils() {
+
+        var OrderId = @Html.Raw(Json.Encode(Model));
+        $.ajax({
+
+            url: "https://localhost:44343/Orders/GetOrderItems?OrderId=" + OrderId,
+            cache: false,
+            success: function (data) {
+                $("#tblbody").empty();
+                for (var i = 0; i < data.length; i++) {
+
+                    var cart = ('<tr><th scope="row">' + (i + 1) + '</th><td>' + data[i].OrderId + '</td><td>' + data[i].ProductName + '</td><td>' + data[i].Price + '</td><td>' + data[i].Quantity + '</td><td>' + data[i].TotalPrice + '</td></tr>');
+
+                    $("#tblbody").append(cart);
+
+                }
+            },
+            error: function (errormessage) {
+                console.log(errormessage);
+            }
+        });
+
+    }
+
+    $(document).ready(function () {
+        GetItemDeteils();
+    });
+
+</script>
+
+
+
+<!-- Hover Rows -->
+<div id="itemtable" class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>ITEM LIST</h2>
+                <div class="body table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="bg-pink">
+                                <th>#</th>
+                                <th>Order No</th>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total Price</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody id="tblbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- #END# Hover Rows -->

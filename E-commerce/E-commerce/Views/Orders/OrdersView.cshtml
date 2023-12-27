@@ -1,0 +1,179 @@
+﻿
+@{
+    ViewBag.Title = "OrdersView";
+    Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<style>
+    .width40 {
+        width: 40%;
+    }
+</style>
+<script>
+
+    function GetItemDeteils(OrderId) {
+       
+        $.ajax({
+            url: "https://localhost:44343/Orders/GetOrderItems?OrderId=" + OrderId,
+            cache: false,
+            success: function (data) {
+                $("#tblbody").empty();
+                for (var i = 0; i < data.length; i++) {
+
+                    var cart = ('<tr><th scope="row">' + (i + 1) + '</th><td>' + data[i].OrderId + '</td><td>' + data[i].ProductName + '</td><td>' + data[i].Price + '</td><td>' + data[i].Quantity + '</td><td>' + data[i].TotalPrice + '</td></tr>');
+
+                    $("#tblbody").append(cart);
+                    SliderRight();
+                }
+            },
+            error: function (errormessage) {
+                console.log(errormessage);
+            }
+        });
+
+    }
+
+    function GetOrders() {
+        if (CheckUserLogin()) {
+            $.ajax({
+                url: "https://localhost:44343/Orders/GetOrders",
+                cache: false,
+                success: function (data) {
+
+                    if (data.length != 0) {
+
+                    
+                    
+                        $("#cartdiv").empty();
+                        for (var i = 0; i < data.length; i++) {
+
+                            var status = "";
+                            switch (data[i].Status) {
+                                case 0:
+                                    status = '<span class="label label-primary">Order Placed</span>';
+                                    break;
+                                case 1:
+                                    status = '<span class="label label-warning">In Progress</span>';
+                                    break;
+                                case 2:
+                                    status = '<span class="label label-success">Success</span>';
+                                    break;
+                                default:
+                            }
+
+                            var ItemDetailsbtn = ('<button style="margin-top: -25px;" id="itemsbtnId ' + data[i].OrderId + '" type="button" onclick="GetItemDeteils(' + data[i].OrderId + ')" class="btn bg-pink waves-effect pull-right">' +
+                                '<i class="material-icons">menu</i><span>Items List</span></button>')
+                            var OrderDate = new Date(parseInt(data[i].OrderDate.substr(6)));
+                            var cart = (' <h4>Order No :' + data[i].OrderId + '</h4><h4> Order Date:' + OrderDate + '</h4><h4>Items :' + data[i].ItemCount +
+                                '</h4><h4>Status : ' + status + ' </h4><h4>Total :' + data[i].GrandTotal + '</h4>' + ItemDetailsbtn + '<hr>');
+
+                            $("#cartdiv").append(cart);
+                        }
+                    }
+                },
+                error: function (errormessage) {
+                    console.log(errormessage);
+                }
+            });
+        }
+        else {
+            LoginPopup();
+        }
+
+    }
+
+   
+
+    $(document).ready(function () {
+        GetOrders();
+
+    });
+
+
+    function SliderRight() {
+        $("#rightsidebar2").addClass('open').addClass('width40');
+        $("#overlayId").css("display", "block");
+    }
+
+    function Closeslider() {
+        $("#rightsidebar2").removeClass('width40');
+        $("#rightsidebar2").removeClass('open');
+        $("#overlayId").css("display", "none");
+
+    }
+
+</script>
+
+
+
+
+<!-- Hover Rows -->
+<div id="table" class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Your Orders</h2>
+            </div>
+            
+            <div id="cartdiv" class="body">
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="info-box">
+                        <div class="icon bg-cyan">
+                            <i class="material-icons">shopping_cart</i>
+                        </div>
+                        <div class="content">
+                            <h1 style="font-size: 40px" class="text">No Orders</h1>
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- #END# Hover Rows -->
+
+
+<!-- #slider -->
+<aside id="rightsidebar2" class="right-sidebar">
+    <div class="card">
+        <div class="header">
+
+            <h2>Item Details</h2>
+            <br>
+           
+        </div>
+    </div>
+
+    <!-- Hover Rows -->
+    <div id="itemtable" class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="body table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="bg-pink">
+                                <th>#</th>
+                                <th>Order No</th>
+                                <th>Product Name</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total Price</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody id="tblbody">
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- #END# Hover Rows -->
+
+    <button class="btn bg-danger waves-effect" onclick="Closeslider()">Close</button>
+
+</aside>
