@@ -11,7 +11,6 @@ namespace E_commerce.Controllers
     public class CategoryController : Controller
     {
         // GET: Category
-        //fix1
         public ActionResult CategoryView()
         {
             return View();
