@@ -11,12 +11,9 @@ namespace E_commerce.Controllers
     public class CategoryController : Controller
     {
         // GET: Category
+        //fix1
         public ActionResult CategoryView()
         {
-
-            CartModel obj = new CartModel();
-            obj.User = 1;
-            obj.UserName = 1;
             return View();
         }
 

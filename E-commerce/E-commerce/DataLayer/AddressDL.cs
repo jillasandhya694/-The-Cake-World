@@ -16,18 +16,6 @@ namespace E_commerce.DataLayer
         }
         public object GetAllAddressByUserId(int UserId)
         {
-
-            UsersModel obj = new UsersModel();
-            obj.UserId = 1;
-            obj.UserId2 = 2;
-            obj.UserId3 = 2;
-            obj.UserId4 = 2;
-            obj.UserId5 = 2;
-
-
-
-
-
             Address_ModelTest data = new Address_ModelTest();
             connection.Open();
             SqlCommand command = getSqlCommand("GetAddress_ByUserID");
