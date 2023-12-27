@@ -1,0 +1,198 @@
+﻿
+@{
+    ViewBag.Title = "ProfileView";
+    Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+<link href="~/plugins/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css" rel="stylesheet">
+<script src="~/plugins/momentjs/moment.js"></script>
+<script src="~/plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
+<script src="~/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+<script>
+
+
+    function UpdateProfileById() {
+        var jsondata = {
+
+            "FirstName": $("#FnameId").val(),
+            "MiddleName": $("#MnameId").val(),
+            "LastName": $("#LnameId").val(),
+            "Gender": $('input:radio[name="gender"]:checked').val(),
+            "AdharNo": $("#AnoId").val(),
+        };
+        $.ajax({
+            url: "https://localhost:44343/Profile/UpdateProfileById",
+            cache: false,
+            data: jsondata,
+            success: function () {
+                alert("success");
+                //modalAlert("Success", "Successfully Updated", "green");
+
+            },
+            error: function () {
+            },
+        });
+
+    }
+
+
+
+    function GetUsersById() {
+        $.ajax({
+            url: "https://localhost:44343/Profile/GetUserById",
+            cache: false,
+            success: function (data) {
+                if (data.Gender == "M") {
+                    $('input:radio[name="gender"]:nth(0)').prop('checked', true);
+                }
+                else{
+                    $('input:radio[name="gender"]:nth(1)').prop('checked', true);
+                }
+
+                //$('#DateId').datepicker('setDate', new Date());
+
+                $("#UsernameId").val(data.UserName);
+                $("#FnameId").val(data.FirstName);
+                $("#MnameId").val(data.MiddleName);
+                $("#LnameId").val(data.LastName);
+                $("#PnoId").val(data.PhoneNo);
+                $("#AnoId").val(data.AdharNo);
+                $("#EmaddId").val(data.EmailId);
+                $("#DateId").val(data.DOB);
+                $("#PasswrdId").val(data.Password);
+
+                 
+            },
+            error: function () {
+            },
+        });
+
+    }
+
+
+
+
+    $(document).ready(function () {
+        GetUsersById();
+         $('#DateId').selectpicker('refresh');
+    });
+
+
+
+</script>
+
+
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    PROFILE
+                </h2>
+             
+            </div>
+            <div class="body">
+
+                <div class="row clearfix">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <div class="form-line">
+                                <h2 class="card-inside-title">UserName</h2>
+                                <input type="text" id="UsernameId" class="form-control" placeholder="UserName" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row clearfix">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div class="form-line">
+                                <h2 class="card-inside-title">FirstName</h2>
+                                <input type="text" id="FnameId" class="form-control" placeholder="FirstName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div class="form-line">
+                                <h2 class="card-inside-title">MiddleName</h2>
+                                <input type="text" id="MnameId" class="form-control" placeholder="MiddleName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <div class="form-line">
+                                <h2 class="card-inside-title">LastName</h2>
+                                <input type="text" id="LnameId" class="form-control" placeholder="LastName">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row clearfix">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <h2 class="card-inside-title">Gender</h2>
+
+                            <input name="gender" type="radio" id="radio_M" class="radio-col-deep-purple" checked="">
+                            <label for="radio_M">Male</label>
+
+                            <input name="gender" type="radio" id="radio_F" class="radio-col-deep-purple" checked="">
+                            <label for="radio_F">Female</label>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <div class="form-line">
+                                <h2 class="card-inside-title">Phone No</h2>
+                                <input type="text" id="PnoId" class="form-control" placeholder="Phone No" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <div class="form-line">
+                                <h2 class="card-inside-title">Adhar No</h2>
+                                <input type="text" id="AnoId" class="form-control" placeholder="Adhar No">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <div class="form-line">
+                                <h2 class="card-inside-title">Email Address</h2>
+                                <input type="text" id="EmaddId" class="form-control" placeholder="Email Address" disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-3">
+                        <h2 class="card-inside-title">DOB</h2>
+                        <div class="form-group">
+                            <div class="form-line" id="DateId">
+                                <input type="text" class="form-control" placeholder="Please choose a date...">
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+
+                </div>
+
+                <button type="button" id="SaveId" onclick="UpdateProfileById()" class="btn btn-warning waves-effect">Save</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

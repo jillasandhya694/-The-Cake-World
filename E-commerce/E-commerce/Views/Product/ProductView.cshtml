@@ -1,0 +1,412 @@
+﻿
+@{
+    ViewBag.Title = "ProductView";
+}
+
+<style>
+    .width40 {
+        width: 40%;
+    }
+</style>
+<script>
+
+    function SaveLargeData()
+    { 
+        ProductDetails.data1.ProductName = $("#Nametxt").val();
+        ProductDetails.data1.CategoryId = $("#CategoryDDL2").val();
+        ProductDetails.data1.ProductDescription = $("#Descriptiontxt").val();
+
+        var jsondata = ProductDetails;
+        $.ajax({
+            url: "https://localhost:44343/Product/SaveProductsDetails",
+            cache: false,
+            type:"POST",
+            data: '{data: ' + JSON.stringify(ProductDetails) + '}',
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",  
+            success: function () {
+                modalAlert("Success", "Successfully Updated", "green");
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+   
+    function EditPopup(PPListId)
+    { //addpopup - addbtn function(0) we are passing & hidden=0 ,empty values//
+        if (PPListId == 0) {
+            $("#Quantitynum").val("");
+            $("#Measurementtxt").val("");
+            $("#Pricenum").val("");
+            $("#hiddenfield").val(0);
+        }
+        else { //set the values from prodetailsdata2
+            var ProD = ProductDetails.data2.filter(i => i.PPListId == PPListId);
+            if (ProD.length > 0) {
+                $("#Quantitynum").val(ProD[0].Quantity);
+                $("#Measurementtxt").val(ProD[0].Measurements);
+                $("#Pricenum").val(ProD[0].Price);
+                $("#hiddenfield").val(PPListId);
+            }
+        }
+
+        $("#ProductPriceModal").modal('show');
+        
+    }
+       
+    
+    function SaveEditedPPlist()
+    {//add
+        if ($("#hiddenfield").val() == 0) {
+            var AddPPListjsondata = {
+
+                "Quantity": $("#Quantitynum").val(),
+                "Measurements": $("#Measurementtxt").val(),
+                "Price": $("#Pricenum").val(),
+                "ProductId": ProductDetails.data1.ProductId,
+                "PPListId": 0
+            };
+            ProductDetails.data2.push(AddPPListjsondata);
+
+        }
+        else {//edit
+            var PriceRowIndex = ProductDetails.data2.findIndex((obj => obj.PPListId == $("#hiddenfield").val()));
+            ProductDetails.data2[PriceRowIndex].Quantity = $("#Quantitynum").val();
+            ProductDetails.data2[PriceRowIndex].Measurements = $("#Measurementtxt").val();
+            ProductDetails.data2[PriceRowIndex].Price = $("#Pricenum").val();
+        }   
+        $("#ProductPriceModal").modal('hide');
+    }
+
+
+    var ProductDetails = {};
+
+    function GetproductDetails(ProductId) {
+        $.ajax({
+            url: "https://localhost:44343/Product/GetProductsDetails?ProductId=" + ProductId,
+            cache: false,
+            success: function (data) {
+
+                $("#Nametxt").val(data.data1.ProductName);
+                $("#Descriptiontxt").val(data.data1.ProductDescription);
+                $("#CategoryDDL2").val(data.data1.CategoryId);
+                $('#CategoryDDL2').selectpicker('refresh');
+
+                $("#ProductPricetblbody").empty();
+                for (var i = 0; i < data.data2.length; i++) {
+
+                    var editbtn = '<button type="button" class="btn bg-purple btn-circle waves-effect waves-circle waves-float js-right-sidebar" data-close="true" onclick="EditPopup(' + data.data2[i].PPListId + ')"><i class="material-icons blue" > edit</i> </button>';
+
+                    $("#ProductPricetblbody").append("<tr><th scope='row'>" + (i + 1) + "</th><td>" + data.data2[i].Quantity + "</td><td>" + data.data2[i].Measurements + "</td><td>" + data.data2[i].Price + "</td><td>" + editbtn + "</td></tr>");
+
+                }
+                SliderRight();
+
+                ProductDetails = data;
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+    }
+
+    function GetCategory() {
+        $.ajax({
+            url: "https://localhost:44343/Category/GetCategory",
+            cache: false,
+            success: function (data) {
+                //dropdown for mainpage//see id's are different
+                $("#CategoryDDL").empty();
+                $("#CategoryDDL").append($("<option></option>").attr("value", 0).text("ALL")); //only to print All in dropdown and fetching getallcategory//
+                for (var i = 0; i < data.length; i++) {
+                    $("#CategoryDDL").append($("<option></option>").attr("value", data[i].CategoryId).text(data[i].Category)); //to append category in dropdown by Id//
+                }
+                $('#CategoryDDL').selectpicker('refresh');
+
+
+                //dropdown for slider//
+                $("#CategoryDDL2").empty();
+                for (var i = 0; i < data.length; i++) {
+                    $("#CategoryDDL2").append($("<option></option>").attr("value", data[i].CategoryId).text(data[i].Category));
+                }
+                $('#CategoryDDL2').selectpicker('refresh');
+
+
+            },
+            error: function (errmessage) {
+                console.log(errmessage);
+            },
+        });
+    }
+
+    function productchangeActive(ProductId) {  //alert($("#switch_" + ProductId).prop('checked'));
+
+        //"https://localhost:44343/Product/UpdateProductActive?ProductId=2&isactive=true"//
+        var isactiveData = $("#switch_" + ProductId).prop('checked');
+        $.ajax({
+            url: "https://localhost:44343/Product/UpdateProductActive?ProductId=" + ProductId + "&IsActive=" + isactiveData,
+            cache: false,
+            success: function () {
+                modalAlert("Success", "Successfully Updated", "green");
+            },
+            error: function (errmessage) {
+                console.log(errmessage);
+            },
+        });
+
+    }
+
+    function GetProducts() {
+
+        $.ajax({
+            url: "https://localhost:44343/Product/GetAllProductsByCategory?CategoryId=" + $("#CategoryDDL").val(),
+            cache: false,
+            success: function (data) {
+                $("#Producttblbody").empty();
+                $("#table").show();
+                for (var i = 0; i < data.length; i++) {
+                    var select = "";// in the btn sentence it is empty
+                    if (data[i].IsActive == true) {
+                        select = "checked";// in the btn sentence it is checked
+                    }
+                    else {
+                        select = "";
+                    }
+                    var editbtn = '<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float js-right-sidebar" data-close="true" onclick="GetproductDetails(' + data[i].ProductId + ')"><i class="material-icons blue" > edit</i> </button>';
+                    var switchhtml = '<div class="col-sm-3"><div class="demo-switch-title"></div><div class="switch"><label><input id ="switch_' + data[i].ProductId + '" onchange="productchangeActive(' + data[i].ProductId + ')"  type="checkbox" ' + select + '><span class="lever switch-col-green"></span></label></div></div>'
+
+
+
+                      $("#Producttblbody").append("<tr><th scope='row'>" + (i + 1) + "</th><td>" + data[i].ProductName + "</td><td>" + data[i].ProductDescription + "</td><td>" + data[i].Category + "</td><td>" + switchhtml + editbtn + "</td></tr>");
+                }
+            },
+            error: function (errmessage) {
+                console.log(errmessage);
+            },
+        });
+    }
+
+    function SliderRight() {
+        $("#rightsidebar2").addClass('open').addClass('width40');
+        $("#overlayId").css("display", "block");
+    }
+
+    function Closeslider() {
+        $("#rightsidebar2").removeClass('width40');
+        $("#rightsidebar2").removeClass('open');
+        $("#overlayId").css("display", "none");
+
+    }
+
+    $(document).ready(function () {
+        GetCategory();
+        $("#table").hide();
+        $("#ppAddId").animate({ left: '600px' });
+    });
+</script>
+
+
+
+<div id="overlayId" class="overlay" style="display: none;"></div>
+<!-- Advanced Select -->
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>PRODUCT</h2>
+
+            </div>
+            <div class="body">
+                <div class="row clearfix">
+                    <div class="col-md-3">
+                        <p>
+                            <b>Category</b>
+                        </p>
+                        <select id="CategoryDDL" class="form-control show-tick">
+                            <option value="0">ALL</option>
+                        </select>
+
+                    </div>
+                    <br>
+                    <button id="searchbtn" type="button" onclick="GetProducts()" class="btn bg-purple waves-effect">
+                        <i class="material-icons">search</i>
+                        <span>SEARCH</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Hover Rows -->
+<div id="table" class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Products</h2>
+            </div>
+            <div class="body table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr class="bg-light-green">
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Actions</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="Producttblbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- #END# Hover Rows -->
+
+<aside id="rightsidebar2" class="right-sidebar">
+    <div class="card">
+        <div class="header">
+
+            <h2>Product Details</h2>
+            <br>
+            <div class="row clearfix">
+                <div class="col-sm-6">
+                    <h2 class="card-inside-title">Name</h2>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input id="Nametxt" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row clearfix">
+                    <div class="col-sm-6">
+                        <h2 class="card-inside-title">Category</h2>
+                        <select id="CategoryDDL2" class="form-control show-tick">
+                            <option value="0">--select--</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-12">
+                    <h2 class="card-inside-title">Description</h2>
+                    <div class="form-group">
+                        <div class="form-line">
+                            <textarea id="Descriptiontxt" rows="4" class="form-control no-resize"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Hover Rows -->
+    <div id="PPtable" class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="card">
+                <div class="header">
+                    <h2>Product Price List</h2>
+
+                    <button id="ppAddId" onclick="EditPopup(0)" type="button" class="btn bg-purple waves-effect">
+                        <i class="material-icons dp48">add</i>
+                        <span>Add</span>
+                    </button>
+
+
+                </div>
+                <div class="body table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr class="bg-light-green">
+                                <th>#</th>
+                                <th>Quantity</th>
+                                <th>Measurements</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody id="ProductPricetblbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- #END# Hover Rows -->
+
+    <button class="btn bg-pink waves-effect" onclick="SaveLargeData()">Save</button>
+    <button class="btn bg-pink waves-effect" onclick="Closeslider()">Close</button>
+
+
+
+
+</aside>
+
+<!-- #Start# PP Add PopUp -->
+
+<div class="modal fade" id="ProductPriceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="ProductPriceLabel">Product Details</h4>
+            </div>
+
+            <input id="hiddenfield" type="text" hidden>
+
+            <div class="modal-body" id="ProductPriceBody">
+
+                <div class="col-sm-6">
+                    <p class="card-inside-title">Quantity</p>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input type="number" id="Quantitynum" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <p class="card-inside-title">Measurement</p>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input type="text" id="Measurementtxt" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <p class="card-inside-title">Price</p>
+                </div>
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <div class="form-line">
+                            <input type="number" id="Pricenum" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="modal-footer">
+                    <button id="AddId" type="submit" onclick="SaveEditedPPlist()" class="btn btn-link waves-effect">SUBMIT</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
+                </div>
+            </div>
+        </div>
+</div>
+
+<!-- #End# PP Add PopUp -->

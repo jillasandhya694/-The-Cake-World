@@ -1,0 +1,223 @@
+﻿
+@{
+    ViewBag.Title = "CategoryView";
+}
+
+<script>
+
+    function AddpopUp() {
+        $("#Categorytxt").val("");
+        $("#EditId").hide();
+        $("#AddId").show();
+        $("#CategoryModal").modal('show');
+    }
+
+    function AddCategory() { 
+
+        var jsondata = {
+            "Category": $("#Categorytxt").val(),
+        }
+      
+        $.ajax({
+            url: "https://localhost:44343/Category/SaveCategory",
+            cache: false,
+            data: jsondata,
+            success: function () {
+
+                $('#CategoryModal').modal('hide');
+                modalAlert("Success", "Successfully Saved Category", "light-green");
+                GetCategory();
+            },
+            error: function (errmessage) {
+                console.log(errmessage);
+            }
+
+        });
+
+       
+    }
+
+
+
+    
+
+    function PopUp(CategoryId)
+    {
+        $.ajax({
+            url: "https://localhost:44343/Category/GetCategorybyCategoryId?CategoryId=" + CategoryId,
+            cache: false,
+            success: function (data) {
+                $("#Idtxt").val(CategoryId);
+                $("#Categorytxt").val(data.Category);
+            },
+            error: function (errmessage) {
+                console.log(errmessage);
+            },
+        });
+
+        $("#CategoryModal").modal('show');
+        $("#EditId").show();
+        $("#AddId").hide();
+    }
+
+    function SaveEditCategory()
+    {
+        var jsondata = {
+            "CategoryId": $("#Idtxt").val(),
+            "Category": $("#Categorytxt").val(),
+        }
+
+        $.ajax({
+            url: "https://localhost:44343/Category/UpdateCategoryById",
+            cache: false,
+            data: jsondata,
+            success: function () {
+                $("#CategoryModal").modal('hide');
+                modalAlert("Success", "Successfully Saved", "pink");
+                GetCategory();
+            },
+            error: function (errmessage) {
+                console.log(errmessage);
+            },
+        });
+
+
+
+    }
+
+    function changeactive(CategoryId)
+    {
+        var isactiveData = $("#switch_" + CategoryId).prop('checked');
+        $.ajax({
+            url: "https://localhost:44343/Category/UpdateIsActive?CategoryId=" + CategoryId + "&IsActive=" + isactiveData,
+                cache: false,
+            success: function () {
+                modalAlert("Success", "Successfully Updated", "blue");
+            },
+            error: function (errmessage) {
+                console.log(errmessage);
+            },
+
+
+
+
+        });
+    }
+
+    function GetCategory() {
+        $.ajax({
+            url: "https://localhost:44343/Category/GetCategory",
+            cache: false,
+            success: function (data)
+            {
+                $("#Categorytblbody").empty();
+                for (var i = 0; i < data.length; i++) {
+                    var convertActive = "";
+                    if (data[i].IsActive == true) {
+                        convertActive = 'checked';
+                    }
+                    else {
+                        convertActive = "";
+                    }
+                    var switchbtn = '<div class="col-sm-3"> <div class="demo-switch-title"></div><div class="switch"><label><input data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Tooltip on bottom"  id= "switch_' + data[i].CategoryId + '" onchange="changeactive(' + data[i].CategoryId+')" type="checkbox" '+ convertActive +'><span class="lever switch-col-light-blue"></span></label></div></div>'
+                    var editbtn = '<button type="button" class="btn bg-red btn-circle waves-effect waves-circle waves-float js-right-sidebar" data-close="true" id="editpopupId ' + data[i].CategoryId + ' " onclick="PopUp(' + data[i].CategoryId +')"><i class="material-icons blue" > edit</i> </button>';
+
+
+
+                    $("#Categorytblbody").append("<tr><th scope='row'>" + (i + 1) + "</th><td>" + data[i].Category + "</td><td>" + switchbtn + editbtn + "</td></tr>");
+                }
+            },
+
+            error: function (errmessage) {
+                console.log(errmessage);
+            }
+        });
+    }
+
+
+
+    $(document).ready(function(){
+        GetCategory();
+    });
+
+
+
+
+
+</script>
+
+
+
+
+<div class="block-header">
+    <h2>CATEGORY</h2>
+</div>
+<br>
+<button onclick="AddpopUp()" type="button" class="btn bg-purple waves-effect">
+    <i class="material-icons dp48">add</i>
+    <span>Add Category</span>
+</button>
+<br><br>
+<!-- Hover Rows -->
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    CATEGORY
+
+                </h2>
+            </div>
+            <div class="body table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>CATEGORY</th>
+                            <th>ACTIONS</th>
+                
+                        </tr>
+                    </thead>
+                    <tbody id="Categorytblbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- #END# Hover Rows -->
+
+
+<div class="modal fade" id="CategoryModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="categoryLabel">Edit Category</h4>
+            </div>
+            <div class="modal-body" id="categoryBody">
+                <input type="text" id="Idtxt" hidden>
+                <div class="col-sm-12">
+                    <p class="card-inside-title">Category</p>
+
+                    <div class="form-group">
+                        <div class="form-line">
+
+                            <input type="text" id="Categorytxt" class="form-control">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="EditId" type="submit" onclick="SaveEditCategory()" class="btn btn-link waves-effect" >SAVE</button>
+                <button id="AddId" type="submit" onclick="AddCategory()" class="btn btn-link waves-effect" >SUBMIT</button>
+                <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

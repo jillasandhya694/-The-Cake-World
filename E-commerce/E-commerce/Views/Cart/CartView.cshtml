@@ -1,0 +1,176 @@
+﻿
+@{
+    ViewBag.Title = "CartView";
+    Layout = "~/Views/Shared/UserLayout.cshtml";
+}
+
+
+<style>
+    .descriptionclass {
+        color: grey !important;
+        font-size: 14px !important;
+    }
+
+    .dropdown-menu {
+        overflow: scroll;
+        height: 100px;
+    }
+</style>
+<script>
+
+   
+
+    function UpdateQuantityBycartId(CardId) {
+        var Quantityname = "#QuantityDDL_" + CardId;
+        var jsondata = {
+            "Quantity": $(Quantityname).val(),
+            "CardId": CardId,
+
+        }
+        $.ajax({
+            url: "https://localhost:44343/Cart/UpdateQuantityByCartId",
+            cache: false,
+            data: jsondata,
+            success: function () {
+                alert("Updated Successfully");
+                GetCartDetails();
+            },
+            error: function () {
+            },
+        });
+    }
+
+
+
+    function InsertIntoOrders() {
+    
+        $.ajax({
+            url: "https://localhost:44343/Cart/InsertintoOrders",
+            cache: false,
+            success: function () {
+                modalAlert3("Success", "Successfully Placed Order", "deep-orange");
+               
+            },
+            error: function (errormessage) {
+                console.log(errormessage);
+            }
+        });
+
+    }
+
+
+    function RemovefromCart(CardId) {
+        $.ajax({
+            url: "https://localhost:44343/Cart/RemovefromCartTable?CardId=" + CardId,
+            cache: false,
+            success: function (data) {
+                modalAlert3("Delete", "Successfully Removed", "deep-orange");
+                GetCartDetails();
+                UpdateCartCount(data);
+            },
+            error: function (errormessage) {
+                console.log(errormessage);
+            }
+        });
+    }
+
+
+    function GetCartDetails() {
+        if (CheckUserLogin()) {
+            $.ajax({
+                url: "https://localhost:44343/Cart/GetCartDetails",
+                cache: false,
+                success: function (data) {
+                    console.log(data);
+                    var totalamount = 0;
+                    var totalitems = 0;
+                    $("#cartdiv").empty();
+                    for (var i = 0; i < data.length; i++) {
+
+                        var Quantitydropdwn = ('<h5>Qty:</h5> <select  style="margin-top: 20px;" id = "QuantityDDL_' + data[i].CardId + '" class="Quantity" onchange="UpdateQuantityBycartId(' + data[i].CardId + ')" > <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>');
+
+                        var deletebtn = ('<button style="margin-top: -25px;" id="removebtnId ' + data[i].CardId + '" type="button" onclick="RemovefromCart(' + data[i].CardId + ')" class="btn bg-deep-orange waves-effect pull-right">' +
+                            '<i class="material-icons">close</i><span>REMOVE</span></button>')
+
+                        var card = ('<div class="media"><div class="media-left"><a href="#"><img class="media-object" src="http://placehold.it/64x64" width="64" height="64">' +
+                            '</a></div><div class="media-body"><h4 id="titleid" class="title">' + data[i].ProductName + '</h4><h4 class="descriptionclass" > ' + data[i].ProductDescription + '</h4> ' +
+                            '<h4 id = "quantityid" class="quantity descriptionclass"> ' + data[i].Volume + ' ' +
+                            data[i].Measurements + '</h4><h4><i class="material-icons">currency_rupee</i>      ' + data[i].Price + '</h4></div><div class="media-right">' + Quantitydropdwn + '</div> ' + deletebtn +
+                            '<h4 class="pull right" style="margin-right: 70px;margin-top: -25px;">Total Price :      ' + data[i].TotalPrice + '</h4> </div><hr>');
+
+                        $("#cartdiv").append(card);
+
+                        $("#QuantityDDL_" + data[i].CardId).val(data[i].Quantity);
+                        totalamount = totalamount + data[i].TotalPrice;
+                        totalitems = totalitems + 1;
+                    }
+
+
+                    $('.Quantity').selectpicker('refresh');
+                    $("#totalamountId").text(totalamount);
+                    $("#totalitemsId").text(totalitems);
+
+                },
+                error: function (errormessage) {
+                    console.log(errormessage);
+                }
+            });
+        }
+        else {
+            LoginPopup();
+        }
+    }
+
+
+    $(document).ready(function () {
+        GetCartDetails();
+
+    });
+</script>
+
+<!-- place order-->
+<button type="button" class="btn bg-light-green waves-effect pull-right" onclick="InsertIntoOrders()" style="margin-top: 30px; padding: 13px 70px 13px 70px">
+    <i class="material-icons">check</i>
+    <span>PLACE ORDER</span>
+</button>
+
+<!-- Total order-->
+<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+    <div class="info-box">
+        <div class="icon bg-cyan">
+            <i class="material-icons">shopping_cart</i>
+        </div>
+        <div class="content">
+            <div class="text">TOTAL ITEMS</div>
+            <div ID="totalitemsId" class="number count-to" data-from="0" data-to="257" data-speed="1000" data-fresh-interval="20"></div>
+        </div>
+    </div>
+</div>
+<!-- Total -->
+<!-- Total -->
+<div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+    <div class="info-box">
+        <div class="icon bg-pink">
+            <i class="material-icons">currency_rupee</i>
+        </div>
+        <div class="content">
+            <div class="text">TOTAL PRICE</div>
+            <div ID="totalamountId" class="number count-to" data-from="0" data-to="125" data-speed="1000" data-fresh-interval="20"></div>
+        </div>
+    </div>
+</div>
+<!-- Total -->
+<!-- Hover Rows -->
+<div id="table" class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>Your Cart</h2>
+            </div>
+            <div id="cartdiv" class="body">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- #END# Hover Rows -->

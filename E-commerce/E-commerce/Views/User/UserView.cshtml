@@ -1,0 +1,154 @@
+﻿
+@{
+    ViewBag.Title = "UserView";
+}
+
+<script>
+
+    function switchftn_(UserId)
+    {
+        var switchdata= $("#switch_"+ UserId).prop('checked');
+        $.ajax({
+            url: "https://localhost:44343/User/UpdateActive?UserId=" + UserId + "&IsActive=" + switchdata,
+                cache: false,
+            success: function () {
+                modalAlert("Success","Successfully Updated", "orange");
+            },
+            error: function (errormessage) {
+                console.log(errormessage);
+            },
+
+        });
+
+    }
+
+    function IsBlockswitchftn_(UserId)
+    {
+        var IsBlockeddata = $("#blockswitch_" + UserId).prop('checked');
+        $.ajax({
+            url: "https://localhost:44343/User/UpdateBlock?UserId=" + UserId + "&IsBlocked=" + IsBlockeddata,
+            cache: false,
+            success: function () {
+                modalAlert("Success", "Successfully Updated", "green");
+            },
+            error: function () {
+            },
+        });
+    }
+
+    function GetUsers()
+    {
+        $.ajax({
+            url: "https://localhost:44343/User/GetUser",
+                cache: false,
+            success: function (data)
+            {
+                $("#Usertblbody").empty();
+                for (var i = 0; i < data.length; i++) {
+
+                    var DOB = "";
+                    if (data[i].DOB == null) {
+                        DOB = "";
+                    }
+                    else {
+                        DOB = new Date(parseInt(data[i].DOB.substr(6)));
+                    }
+
+                    var IsActiveclass = "";
+                    if (data[i].IsActive == true) {
+                        IsActiveclass = "checked";
+                    }
+                    else {
+                        IsActiveclass = "";
+                    }
+
+                    var IsBlockclass = "";
+                    if (data[i].IsBlocked == true) {
+                        IsBlockclass = "checked";
+                    }
+                    else {
+                        IsBlockclass = "";
+                    }
+
+                    var Isdeleteclass = "";
+                    if (data[i].IsDeleted == true) {
+                        Isdeleteclass = "checked";
+                    }
+                    else {
+                        Isdeleteclass = "";
+                    }
+
+
+
+                  
+                   
+                  
+                     
+                    var switchhtml = '<div class="col-sm-3"><div class="demo-switch-title"></div><div class="switch"><label><input id ="switch_' + data[i].UserId + '" onchange="switchftn_('+data[i].UserId+')" type="checkbox" '+ IsActiveclass +'><span class="lever switch-col-green"></span></label></div></div>'
+                    var blockswitch = '<div class="col-sm-3"><div class="demo-switch-title"></div><div class="switch"><label><input id ="blockswitch_' + data[i].UserId + '" onchange="IsBlockswitchftn_(' + data[i].UserId + ')" type="checkbox" ' + IsBlockclass +'><span class="lever switch-col-red"></span></label></div></div>'
+                    var deleteswitch = '<div class="col-sm-3"><div class="demo-switch-title"></div><div class="switch"><label><input id ="deleteswitch_' + data[i].UserId + '" onchange="Isdeleteswitchftn_(' + data[i].UserId + ')" type="checkbox" ' + Isdeleteclass + '><span class="lever switch-col-green"></span></label></div></div>'
+
+
+                    $("#Usertblbody").append("<tr><th scope='row'>" + (i + 1) + "</th><td>" + data[i].UserName + "</td>"+
+                        "<td>" + data[i].FirstName + "</td><td>" + data[i].MiddleName + "</td><td>" + data[i].LastName + "</td><td>" + DOB + "</td>"+
+                        "<td> " + data[i].Gender + "</td><td>" + data[i].PhoneNo + "</td><td>" + data[i].AdharNo + "</td><td>" + data[i].EmailId + "</td>"+
+                        " <td> " + switchhtml + "</td><td> " + deleteswitch + "</td><td> " + blockswitch + "</td></tr>") ;
+                }
+
+            },
+            error: function ()
+            {
+            },
+        });
+
+    }
+
+    $(document).ready(function () {
+        GetUsers();
+
+    });
+
+</script>
+
+<div class="block-header">
+    <h2>USER</h2>
+</div>
+
+<!-- Hover Rows -->
+<div class="row clearfix">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+            <div class="header">
+                <h2>
+                    USER DETAILS
+                </h2>
+            </div>
+            <div class="body table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>UserName</th>
+                            <th>FirstName</th>
+                            <th>MiddleName</th>
+                            <th>LastName</th>
+                            <th>DOB</th>
+                            <th>Gender</th>
+                            <th>PhoneNo</th>
+                            <th>AdharNo</th>
+                            <th>EmailId</th>
+                            <th>IsActive</th>
+                            <th>IsDeleted</th>
+                            <th>IsBlocked</th>
+                            
+
+                        </tr>
+                    </thead>
+                    <tbody id="Usertblbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- #END# Hover Rows -->
